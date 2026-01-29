@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hydro MPSA</title>
+    <meta name="theme-color" content="#ffffff">
+    <link rel="manifest" href="./manifest.json">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+    
+    <script src="./assets/leitor.js"></script>
+
+    <style>
+        body { font-family: 'Roboto', sans-serif; background: #ffffff; color: #4a4a4a; display: flex; flex-direction: column; align-items: center; min-height: 100vh; margin: 0; }
+        .container { width: 85%; max-width: 500px; padding: 30px 20px; text-align: center; }
+        
+        /* Cabeçalho */
+        .logo-text {
+            color: #0277bd; font-size: 1.8rem; font-weight: 700; text-transform: uppercase;
+            border-bottom: 4px solid #81D4FA; display: inline-block; padding-bottom: 5px; margin-bottom: 30px;
+        }
+
+        .card { background: white; border-radius: 20px; padding: 25px; box-shadow: 0 8px 20px rgba(129, 212, 250, 0.25); margin-bottom: 20px; border: 1px solid #f0f0f0; }
+        
+        h2 { color: #0277bd; margin-top: 0; font-size: 1.4rem; }
+        
+        p { line-height: 1.6; font-size: 0.95rem; color: #666; margin-bottom: 15px; }
+        
+        /* AVISO DESTAQUE */
+        .aviso-importante {
+            background-color: #e3f2fd; border-left: 5px solid #2196f3; padding: 15px;
+            text-align: left; border-radius: 4px; margin: 20px 0; color: #0d47a1; font-weight: 500;
+        }
+
+        .btn { background: #81D4FA; color: #014361; padding: 15px; width: 100%; border: none; border-radius: 30px; font-weight: bold; font-size: 1rem; cursor: pointer; margin-top: 15px; display: block; box-shadow: 0 4px 10px rgba(129, 212, 250, 0.4); }
+        .btn-cancel { background: #ef5350; color: white; }
+        .btn-back { background: #0277bd; color: white; }
+
+        video { width: 100%; border-radius: 12px; background: #000; }
+        #reader { width: 100%; border-radius: 12px; overflow: hidden; background: #000; }
+        .hidden { display: none !important; }
+        
+        .fab { position: fixed; bottom: 20px; right: 20px; background: #ef5350; color: white; width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; text-decoration: none; font-weight: bold; box-shadow: 0 4px 15px rgba(239, 83, 80, 0.4); z-index: 100; font-size: 0.9rem; flex-direction: column;}
+    </style>
+</head>
+<body>
+
+    <a href="tel:193" class="fab"><span>🆘</span>SOS</a>
+
+    <div class="container">
+        <div class="logo-text">Hydro MPSA</div>
+
+        <div id="screen-home">
+            <div class="card">
+                <h2>Boas Vindas a Hydro MPSA!</h2>
+                
+                <p>Nesse QR Code serão carregados vídeos educativos que serão utilizados em cada equipamento dentro da Usina.</p>
+                
+                <div class="aviso-importante">
+                    ⚠️ <strong>Não feche a Aba que você acaba de abrir</strong>, pois será essencial para evitar os problemas de conexão que ocorrem dentro da planta.
+                </div>
+                
+                <p style="font-weight: 500; color: #0277bd;">
+                    Tenha uma Ótima Experiência! 😊✨
+                </p>
+
+                <div id="status-msg" style="font-size: 0.8rem; margin-top: 10px; color: #999;">Carregando sistema...</div>
+
+                <button class="btn" onclick="iniciarScanner()">📷 LER QR CODE</button>
+            </div>
+        </div>
+
+        <div id="screen-scanner" class="hidden">
+            <div class="card">
+                <h2>Escanear Equipamento</h2>
+                <div id="reader"></div>
+                <p style="font-size:0.8rem; color:red;" id="scan-error"></p>
+                <button class="btn btn-cancel" onclick="pararScanner()">Cancelar Leitura</button>
+            </div>
+        </div>
+
+        <div id="screen-video" class="hidden">
+            <div class="card">
+                <h2 id="video-title">Equipamento</h2>
+                <video id="player" controls controlsList="nodownload"></video>
+                <button class="btn btn-back" onclick="pararScanner()">⬅ Voltar ao Início</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Verificação do JS do Leitor
+        window.onload = function() {
+            if (typeof Html5Qrcode === 'undefined') {
+                document.getElementById('status-msg').innerHTML = "<span style='color:red'>ERRO: Arquivo leitor.js não encontrado.</span>";
+            } else {
+                document.getElementById('status-msg').innerHTML = "<span style='color:#4CAF50'>✓ Sistema Online e Pronto</span>";
+            }
+        };
+
+        function mostrarTela(id) {
+            ['screen-home', 'screen-scanner', 'screen-video'].forEach(t => document.getElementById(t).classList.add('hidden'));
+            document.getElementById(id).classList.remove('hidden');
+        }
+
+        let html5QrCode;
+        function iniciarScanner() {
+            mostrarTela('screen-scanner');
+            html5QrCode = new Html5Qrcode("reader");
+            html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 },
+                (decodedText) => {
+                    html5QrCode.stop().then(() => { html5QrCode.clear(); rotearVideo(decodedText); });
+                },
+                (errorMessage) => { }
+            ).catch(err => {
+                document.getElementById('scan-error').innerText = "Erro Câmera: " + err;
+            });
+        }
+
+        function pararScanner() {
+            if(html5QrCode) html5QrCode.stop().then(() => html5QrCode.clear()).catch(() => {});
+            mostrarTela('screen-home');
+            const p = document.getElementById('player');
+            p.pause(); p.src = "";
+        }
+
+        function rotearVideo(texto) {
+            const p = document.getElementById('player');
+            const t = document.getElementById('video-title');
+            
+            if (texto.toLowerCase().includes('moinho')) {
+                t.innerText = "Moinho Primário 01";
+                p.src = "./assets/moinho.mp4";
+                mostrarTela('screen-video');
+                p.play();
+            } else if (texto.toLowerCase().includes('peneira')) {
+                t.innerText = "Peneira Vibratória";
+                p.src = "./assets/peneira.mp4";
+                mostrarTela('screen-video');
+                p.play();
+            } else {
+                alert("QR Code não reconhecido.\nLeitura: " + texto);
+                mostrarTela('screen-home');
+            }
+        }
+
+        if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js');
+    </script>
+</body>
+</html>
