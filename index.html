@@ -106,52 +106,64 @@
             const texto = document.getElementById('status-txt');
 
             btn.disabled = true;
-            btn.innerText = "Preparando...";
+            btn.innerText = "Conectando...";
             areaProg.style.display = "block";
 
-            // Lista manual
+            // LISTA SEM O PONTO (./) PARA EVITAR BUG NO ANDROID
             const videos = [
-                './assets/moinho.mp4',
-                './assets/peneira.mp4'
+                'assets/moinho.mp4',
+                'assets/peneira.mp4'
             ];
 
-            // Atenção: Use o MESMO nome do cache do sw.js
+            // Use o MESMO nome que está no sw.js
             const cacheName = 'hydro-mpsa-vFinal-Range'; 
-            const cache = await caches.open(cacheName);
             
-            let total = videos.length;
-            let completados = 0;
+            try {
+                const cache = await caches.open(cacheName);
+                let total = videos.length;
+                let completados = 0;
 
-            for (const url of videos) {
-                texto.innerText = `Baixando arquivo ${completados + 1}/${total}...`;
-                try {
-                    // 1. Baixa o arquivo inteiro como BLOB
-                    const response = await fetch(url);
-                    if (!response.ok) throw new Error('Rede falhou');
+                for (const url of videos) {
+                    texto.innerText = `Baixando ${url.split('/').pop()}...`;
                     
-                    // 2. Salva no Cache manualmente
-                    await cache.put(url, response);
+                    // O TRUQUE: Adiciona um número aleatório para furar o cache antigo
+                    const urlParaBaixar = url + "?v=" + new Date().getTime();
                     
+                    // Tenta baixar direto da internet
+                    const response = await fetch(urlParaBaixar, { cache: 'no-store' });
+                    
+                    if (!response.ok) {
+                        throw new Error(`Erro ${response.status} ao baixar ${url}`);
+                    }
+                    
+                    // Salva no cache com o nome CORRETO (sem o ?v=...)
+                    // Precisamos clonar porque o corpo da resposta só pode ser lido uma vez
+                    await cache.put(url, response.clone());
+                    
+                    // Se for o primeiro vídeo, adicionamos o ./ também por segurança
+                    await cache.put('./' + url, response.clone());
+
                     completados++;
                     let pct = (completados / total) * 100;
                     barra.style.width = pct + "%";
-                } catch (err) {
-                    texto.innerText = "Erro no arquivo: " + url;
-                    texto.style.color = "red";
-                    console.error(err);
                 }
-            }
 
-            if (completados === total) {
-                texto.innerText = "Sistema 100% Offline e Pronto! 🚀";
-                texto.style.color = "green";
-                btn.innerText = "Vídeos Salvos ✓";
-                btn.style.background = "#ccc";
-                
-                // Força o Service Worker a reconhecer os novos arquivos
-                if (navigator.serviceWorker.controller) {
-                    navigator.serviceWorker.controller.postMessage({action: 'skipWaiting'});
+                if (completados === total) {
+                    texto.innerText = "Download Concluído! ✅";
+                    texto.style.color = "green";
+                    btn.innerText = "Conteúdo Salvo ✓";
+                    btn.style.background = "#ccc";
+                    alert("Sucesso! Tudo baixado. Pode desligar a internet e testar.");
                 }
+
+            } catch (err) {
+                // MENSAGEM DE ERRO DETALHADA
+                texto.innerHTML = "Falha: " + err.message;
+                texto.style.color = "red";
+                btn.disabled = false;
+                btn.innerText = "Tentar Novamente";
+                alert("Ocorreu um erro:\n" + err.message + "\n\nVerifique se o arquivo existe na pasta 'assets' do GitHub e se o nome é EXATAMENTE minúsculo.");
+                console.error(err);
             }
         }
 
@@ -219,4 +231,5 @@
     </script>
 </body>
 </html>
+
 
