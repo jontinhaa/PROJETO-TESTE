@@ -3,88 +3,173 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hydro MPSA</title>
+    <title>Hydro MPSA | Sistema Técnico</title>
     <meta name="theme-color" content="#ffffff">
     <link rel="manifest" href="./manifest.json">
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     
     <script src="./assets/leitor.js"></script>
 
     <style>
-        /* DESIGN SYSTEM */
-        body { font-family: 'Roboto', sans-serif; background: #ffffff; color: #4a4a4a; display: flex; flex-direction: column; align-items: center; min-height: 100vh; margin: 0; }
-        .container { width: 85%; max-width: 500px; padding: 30px 20px; text-align: center; }
+        /* --- ESTILO CORPORATIVO INDUSTRIAL --- */
+        :root {
+            --hydro-blue: #004B87; /* Azul Oficial Hydro */
+            --hydro-light: #81D4FA;
+            --alert-red: #D32F2F;
+            --success-green: #388E3C;
+            --gray-bg: #F5F7FA;
+            --text-dark: #263238;
+        }
+
+        body { 
+            font-family: 'Roboto', sans-serif; 
+            background: var(--gray-bg); 
+            color: var(--text-dark); 
+            margin: 0; padding: 0;
+            display: flex; flex-direction: column; align-items: center; 
+            min-height: 100vh;
+        }
         
-        .logo-text { color: #0277bd; font-size: 1.8rem; font-weight: 700; text-transform: uppercase; border-bottom: 4px solid #81D4FA; display: inline-block; padding-bottom: 5px; margin-bottom: 30px; }
-
-        .card { background: white; border-radius: 20px; padding: 25px; box-shadow: 0 8px 20px rgba(129, 212, 250, 0.25); margin-bottom: 20px; border: 1px solid #f0f0f0; }
+        .container { 
+            width: 100%; max-width: 480px; 
+            padding: 20px; box-sizing: border-box; 
+            text-align: center; 
+        }
         
-        h2 { color: #0277bd; margin-top: 0; font-size: 1.4rem; }
-        p { line-height: 1.6; font-size: 0.95rem; color: #666; margin-bottom: 15px; }
+        /* HEADER */
+        .header {
+            margin-bottom: 25px; border-bottom: 3px solid var(--hydro-light);
+            padding-bottom: 10px; display: inline-block;
+        }
+        .header h1 {
+            color: var(--hydro-blue); font-size: 1.5rem; margin: 0; 
+            text-transform: uppercase; letter-spacing: 1px;
+        }
+
+        /* CARDS */
+        .card { 
+            background: white; border-radius: 8px; padding: 20px; 
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 15px; 
+            border: 1px solid #E0E0E0;
+        }
         
-        .aviso-importante { background-color: #e3f2fd; border-left: 5px solid #2196f3; padding: 15px; text-align: left; border-radius: 4px; margin: 20px 0; color: #0d47a1; font-weight: 500; }
+        p { font-size: 0.9rem; line-height: 1.5; color: #546E7A; margin-bottom: 15px; }
 
-        .btn { background: #81D4FA; color: #014361; padding: 15px; width: 100%; border: none; border-radius: 30px; font-weight: bold; font-size: 1rem; cursor: pointer; margin-top: 15px; display: block; box-shadow: 0 4px 10px rgba(129, 212, 250, 0.4); transition: all 0.3s; }
+        /* --- MAPA INTERATIVO (ÁREA CLICÁVEL) --- */
+        .mapa-label { font-weight: bold; color: var(--hydro-blue); margin-bottom: 10px; display: block; text-align: left; }
         
-        /* Botão de Download Manual */
-        .btn-download { background: #4CAF50; color: white; margin-bottom: 15px; }
-        .btn-download:disabled { background: #ccc; cursor: not-allowed; }
+        .mapa-container {
+            display: flex;
+            width: 100%;
+            height: 120px;
+            border: 2px solid var(--hydro-blue);
+            border-radius: 6px;
+            overflow: hidden;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
 
-        .btn-cancel { background: #ef5350; color: white; }
-        .btn-back { background: #0277bd; color: white; }
+        .zona {
+            flex: 1; /* Divide exatamente no meio */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1rem;
+            color: white;
+            cursor: pointer;
+            transition: background 0.2s;
+            text-transform: uppercase;
+            position: relative;
+        }
 
-        /* BARRA DE PROGRESSO */
-        .progress-container { margin-top: 20px; text-align: left; display: none; } /* Oculto por padrão */
-        .progress-bar-bg { width: 100%; height: 10px; background-color: #f1f1f1; border-radius: 10px; overflow: hidden; margin-top: 8px; }
-        .progress-bar-fill { height: 100%; width: 0%; background-color: #4CAF50; border-radius: 10px; transition: width 0.4s ease; }
-        .loading-text { font-size: 0.85rem; color: #4CAF50; font-weight: 500; min-height: 20px; display: block; margin-top: 5px;}
+        .zona:active { opacity: 0.8; }
 
-        video { width: 100%; border-radius: 12px; background: #000; }
-        #reader { width: 100%; border-radius: 12px; overflow: hidden; background: #000; }
+        .zona-esquerda {
+            background-color: #0277bd; /* Azul Médio */
+            border-right: 1px solid white;
+        }
+        .zona-direita {
+            background-color: #004B87; /* Azul Escuro */
+            border-left: 1px solid white;
+        }
+
+        /* Ícones no mapa (Visual) */
+        .zona span { z-index: 2; }
+        .zona::after {
+            content: ''; position: absolute; top:0; left:0; right:0; bottom:0;
+            background: rgba(255,255,255,0.1); opacity: 0;
+        }
+        .zona:active::after { opacity: 1; }
+
+        /* BOTÕES */
+        .btn { 
+            background: var(--hydro-blue); color: white; padding: 14px; 
+            width: 100%; border: none; border-radius: 6px; 
+            font-weight: 600; font-size: 0.95rem; cursor: pointer; 
+            box-shadow: 0 2px 5px rgba(0,75,135,0.3);
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+        }
+        
+        .btn-download { background: var(--success-green); margin-bottom: 15px; }
+        .btn-download:disabled { background: #B0BEC5; cursor: wait; }
+        
+        .btn-cancel { background: var(--alert-red); margin-top: 10px; }
+
+        /* STATUS E PROGRESSO */
+        .progress-box { display: none; margin-top: 15px; text-align: left; }
+        .progress-track { background: #E0E0E0; height: 8px; border-radius: 4px; overflow: hidden; }
+        .progress-fill { background: var(--success-green); height: 100%; width: 0%; transition: width 0.3s; }
+        .status-text { font-size: 0.8rem; color: var(--text-dark); margin-top: 5px; font-weight: 500; }
+
+        /* VÍDEO E LEITOR */
+        video { width: 100%; border-radius: 4px; background: black; margin-top: 10px; }
+        #reader { width: 100%; border-radius: 4px; overflow: hidden; background: black; }
         .hidden { display: none !important; }
-        
-        .fab { position: fixed; bottom: 20px; right: 20px; background: #ef5350; color: white; width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; text-decoration: none; font-weight: bold; box-shadow: 0 4px 15px rgba(239, 83, 80, 0.4); z-index: 100; font-size: 0.9rem; flex-direction: column;}
     </style>
 </head>
 <body>
 
-    <a href="tel:193" class="fab"><span>🆘</span>SOS</a>
-
     <div class="container">
-        <div class="logo-text">Hydro MPSA</div>
+        <div class="header"><h1>Hydro MPSA</h1></div>
 
         <div id="screen-home">
             <div class="card">
-                <h2>Boas Vindas a Hydro MPSA!</h2>
-                
-                <p>Sistema de vídeos offline para suporte técnico na planta.</p>
-                
-                <div class="aviso-importante">
-                    ⚠️ <strong>Primeiro Acesso:</strong> Clique no botão verde abaixo para salvar os vídeos no seu celular. Isso garante o funcionamento sem internet.
-                </div>
-                
-                <button class="btn btn-download" id="btn-baixar" onclick="baixarConteudo()">⬇️ BAIXAR VÍDEOS OFFLINE</button>
+                <p><strong>Status:</strong> <span id="sys-status" style="color:orange">Verificando...</span></p>
 
-                <div class="progress-container" id="area-progresso">
-                    <div class="progress-bar-bg">
-                        <div class="progress-bar-fill" id="progress-fill"></div>
+                <button class="btn btn-download" id="btn-baixar" onclick="baixarConteudo()">
+                    <span>⬇ BAIXAR CONTEÚDO OFFLINE</span>
+                </button>
+
+                <div class="progress-box" id="area-progresso">
+                    <div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
+                    <div class="status-text" id="status-txt">Iniciando...</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <span class="mapa-label">MAPA DE EQUIPAMENTOS</span>
+                <div class="mapa-container">
+                    <div class="zona zona-esquerda" onclick="rotearVideo('moinho')">
+                        <span>⚙️ MOINHO</span>
                     </div>
-                    <span class="loading-text" id="status-txt">Iniciando download...</span>
+                    <div class="zona zona-direita" onclick="rotearVideo('peneira')">
+                        <span>⛓️ PENEIRA</span>
+                    </div>
                 </div>
+                <p style="font-size:0.75rem; color:#999; margin:0;">Toque na área para abrir o vídeo técnico.</p>
+            </div>
 
-                <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
-
-                <button class="btn" id="btn-ler" onclick="iniciarScanner()">📷 LER QR CODE</button>
-                <div id="status-msg" style="font-size: 0.8rem; margin-top: 10px; color: #999;">Aguardando ação...</div>
+            <div class="card">
+                <button class="btn" onclick="iniciarScanner()">📷 LER QR CODE</button>
             </div>
         </div>
 
         <div id="screen-scanner" class="hidden">
             <div class="card">
-                <h2>Escanear Equipamento</h2>
+                <h2>Leitura de Código</h2>
                 <div id="reader"></div>
-                <p style="font-size:0.8rem; color:red;" id="scan-error"></p>
-                <button class="btn btn-cancel" onclick="pararScanner()">Cancelar Leitura</button>
+                <button class="btn btn-cancel" onclick="pararScanner()">CANCELAR</button>
             </div>
         </div>
 
@@ -92,154 +177,151 @@
             <div class="card">
                 <h2 id="video-title">Equipamento</h2>
                 <video id="player" controls controlsList="nodownload"></video>
-                <button class="btn btn-back" onclick="fecharVideo()">⬅ Voltar ao Início</button>
+                <button class="btn" onclick="fecharVideo()" style="margin-top:15px; background: var(--hydro-blue);">
+                    ⬅ VOLTAR AO MAPA
+                </button>
             </div>
         </div>
     </div>
 
     <script>
-        // --- 1. LÓGICA DE DOWNLOAD FORÇADO (A SOLUÇÃO) ---
+        // --- 1. DOWNLOAD SYSTEM (ABSOLUTE PATHS) ---
         async function baixarConteudo() {
             const btn = document.getElementById('btn-baixar');
-            const areaProg = document.getElementById('area-progresso');
-            const barra = document.getElementById('progress-fill');
-            const texto = document.getElementById('status-txt');
-
+            const area = document.getElementById('area-progresso');
+            const bar = document.getElementById('progress-fill');
+            const txt = document.getElementById('status-txt');
+            
             btn.disabled = true;
-            btn.innerText = "Conectando...";
-            areaProg.style.display = "block";
+            area.style.display = 'block';
 
-            // PEGA O ENDEREÇO BASE DO SITE (Ex: https://jonathan.github.io/nexos/)
-            // Remove o "index.html" se estiver lá
+            // Define URL base absoluta para evitar erros de ./ no Android
             const baseUrl = window.location.href.substring(0, window.location.href.lastIndexOf('/') + 1);
-
-            // MONTA OS LINKS ABSOLUTOS (SEM ERRO DE CAMINHO)
-            const videos = [
+            
+            // LISTA DE ARQUIVOS
+            const assets = [
                 baseUrl + 'assets/moinho.mp4',
                 baseUrl + 'assets/peneira.mp4'
             ];
-
-            // NOME DO CACHE (Tem que bater com o sw.js)
-            const cacheName = 'hydro-mpsa-vFinal-Range'; 
             
+            const cacheName = 'hydro-pro-v1'; // Deve bater com o sw.js
+
             try {
                 const cache = await caches.open(cacheName);
-                let total = videos.length;
-                let completados = 0;
+                let done = 0;
 
-                for (const url of videos) {
-                    const nomeArquivo = url.split('/').pop();
-                    texto.innerText = `Baixando ${nomeArquivo}...`;
-                    
-                    // Adiciona ?v=tempo para ignorar cache antigo
-                    const urlBypass = url + "?v=" + new Date().getTime();
+                for (const url of assets) {
+                    const name = url.split('/').pop();
+                    txt.innerText = `Baixando: ${name}...`;
+
+                    // Cache Buster: ?t=tempo para forçar download novo
+                    const safeUrl = url + "?t=" + Date.now();
                     
                     try {
-                        const response = await fetch(urlBypass, { cache: 'no-store' });
+                        const response = await fetch(safeUrl, { cache: 'no-store' });
+                        if(!response.ok) throw new Error(`HTTP ${response.status}`);
                         
-                        if (!response.ok) {
-                            // SE DER ERRO, VAI MOSTRAR NA TELA O MOTIVO EXATO
-                            throw new Error(`Erro ${response.status} (${response.statusText})`);
-                        }
-                        
-                        // Salva no cache com a URL original (limpa)
+                        // Salva com a URL original (limpa)
                         await cache.put(url, response.clone());
+                        // Salva versão relativa também por segurança
+                        await cache.put('assets/' + name, response.clone());
                         
-                        // Salva também a versão relativa por garantia
-                        await cache.put('./assets/' + nomeArquivo, response.clone());
+                        done++;
+                        bar.style.width = (done/assets.length * 100) + "%";
 
-                        completados++;
-                        let pct = (completados / total) * 100;
-                        barra.style.width = pct + "%";
-                        
-                    } catch (fetchErr) {
-                        // ALERTA DE ERRO ESPECÍFICO PARA VOCÊ VER
-                        alert(`FALHA AO BAIXAR!\n\nArquivo: ${nomeArquivo}\nErro: ${fetchErr.message}\n\nLink tentado: ${url}`);
-                        throw fetchErr; // Para o loop
+                    } catch (e) {
+                        alert(`FALHA CRÍTICA:\nNão foi possível baixar ${name}.\nVerifique a conexão.`);
+                        throw e;
                     }
                 }
 
-                if (completados === total) {
-                    texto.innerText = "Download Concluído! ✅";
-                    texto.style.color = "green";
-                    btn.innerText = "Conteúdo Salvo ✓";
-                    btn.style.background = "#ccc";
-                    alert("Sucesso! Pode desligar a internet.");
-                }
-
+                txt.innerText = "Sincronização Concluída.";
+                txt.style.color = "var(--success-green)";
+                btn.innerText = "SISTEMA OFFLINE PRONTO ✓";
+                
             } catch (err) {
-                texto.innerHTML = "Falha no download.";
-                texto.style.color = "red";
+                txt.innerText = "Erro no download.";
+                txt.style.color = "red";
                 btn.disabled = false;
-                btn.innerText = "Tentar Novamente";
-                console.error(err);
             }
         }
 
-        // --- 2. SISTEMA PADRÃO ---
-        window.onload = function() {
-            if (typeof Html5Qrcode === 'undefined') {
-                document.getElementById('status-msg').innerHTML = "<span style='color:red'>ERRO: Leitor não carregou.</span>";
+        // --- 2. SISTEMA DE ROTAS E VÍDEO ---
+        function rotearVideo(tag) {
+            const id = tag.toLowerCase();
+            const player = document.getElementById('player');
+            const title = document.getElementById('video-title');
+            
+            let src = '';
+            let nome = '';
+
+            if(id.includes('moinho')) {
+                src = './assets/moinho.mp4';
+                nome = 'Moinho Primário';
+            } else if(id.includes('peneira')) {
+                src = './assets/peneira.mp4';
+                nome = 'Peneira Vibratória';
             } else {
-                document.getElementById('status-msg').innerHTML = "Sistema pronto.";
+                alert('Equipamento não identificado: ' + tag);
+                return;
             }
-        };
 
-        function mostrarTela(id) {
-            ['screen-home', 'screen-scanner', 'screen-video'].forEach(t => document.getElementById(t).classList.add('hidden'));
-            document.getElementById(id).classList.remove('hidden');
-        }
-
-        let html5QrCode;
-        function iniciarScanner() {
-            mostrarTela('screen-scanner');
-            html5QrCode = new Html5Qrcode("reader");
-            html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 },
-                (decodedText) => {
-                    html5QrCode.stop().then(() => { html5QrCode.clear(); rotearVideo(decodedText); });
-                },
-                (errorMessage) => { }
-            ).catch(err => {
-                document.getElementById('scan-error').innerText = "Erro Câmera: " + err;
-            });
-        }
-
-        function pararScanner() {
-            if(html5QrCode) html5QrCode.stop().then(() => html5QrCode.clear()).catch(() => {});
-            mostrarTela('screen-home');
+            // Ativa Player
+            title.innerText = nome;
+            player.src = src;
+            mostrarTela('screen-video');
+            player.play().catch(e => console.log("Autoplay bloqueado pelo browser"));
         }
 
         function fecharVideo() {
             const player = document.getElementById('player');
-            player.pause(); player.currentTime = 0; player.src = "";
+            player.pause();
+            player.src = ""; // Libera memória
             mostrarTela('screen-home');
         }
 
-        function rotearVideo(texto) {
-            const p = document.getElementById('player');
-            const t = document.getElementById('video-title');
-            const codigo = texto.toLowerCase();
-
-            if (codigo.includes('moinho')) {
-                t.innerText = "Moinho Primário 01";
-                p.src = "./assets/moinho.mp4";
-                mostrarTela('screen-video');
-                p.play();
-            } else if (codigo.includes('peneira')) {
-                t.innerText = "Peneira Vibratória";
-                p.src = "./assets/peneira.mp4";
-                mostrarTela('screen-video');
-                p.play();
-            } else {
-                alert("QR Code não reconhecido.\nLeitura: " + texto);
-                mostrarTela('screen-home');
-            }
+        // --- 3. UTILITÁRIOS E LEITOR ---
+        function mostrarTela(id) {
+            ['screen-home', 'screen-scanner', 'screen-video'].forEach(i => 
+                document.getElementById(i).classList.add('hidden'));
+            document.getElementById(id).classList.remove('hidden');
         }
 
-        if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js');
+        let scanner;
+        function iniciarScanner() {
+            mostrarTela('screen-scanner');
+            scanner = new Html5Qrcode("reader");
+            scanner.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 },
+                (decoded) => {
+                    scanner.stop().then(() => {
+                        scanner.clear();
+                        rotearVideo(decoded);
+                    });
+                },
+                (err) => {}
+            );
+        }
+
+        function pararScanner() {
+            if(scanner) scanner.stop().then(() => scanner.clear()).catch(()=>{});
+            mostrarTela('screen-home');
+        }
+
+        // --- 4. INICIALIZAÇÃO ---
+        window.onload = () => {
+            const status = document.getElementById('sys-status');
+            if(typeof Html5Qrcode === 'undefined') {
+                status.innerText = "Erro: Leitor Ausente";
+                status.style.color = "red";
+            } else {
+                status.innerText = "Online e Operacional";
+                status.style.color = "green";
+            }
+        };
+
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('./sw.js');
+        }
     </script>
 </body>
 </html>
-
-
-
