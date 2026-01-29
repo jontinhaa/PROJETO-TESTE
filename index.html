@@ -24,18 +24,20 @@
         
         .aviso-importante { background-color: #e3f2fd; border-left: 5px solid #2196f3; padding: 15px; text-align: left; border-radius: 4px; margin: 20px 0; color: #0d47a1; font-weight: 500; }
 
-        .btn { background: #81D4FA; color: #014361; padding: 15px; width: 100%; border: none; border-radius: 30px; font-weight: bold; font-size: 1rem; cursor: pointer; margin-top: 15px; display: block; box-shadow: 0 4px 10px rgba(129, 212, 250, 0.4); opacity: 0.5; pointer-events: none; transition: all 0.3s; }
-        .btn.ativo { opacity: 1; pointer-events: all; }
+        .btn { background: #81D4FA; color: #014361; padding: 15px; width: 100%; border: none; border-radius: 30px; font-weight: bold; font-size: 1rem; cursor: pointer; margin-top: 15px; display: block; box-shadow: 0 4px 10px rgba(129, 212, 250, 0.4); transition: all 0.3s; }
         
-        .btn-cancel { background: #ef5350; color: white; opacity: 1; pointer-events: all; }
-        .btn-back { background: #0277bd; color: white; opacity: 1; pointer-events: all; }
+        /* Botão de Download Manual */
+        .btn-download { background: #4CAF50; color: white; margin-bottom: 15px; }
+        .btn-download:disabled { background: #ccc; cursor: not-allowed; }
 
-        /* --- BARRA DE PROGRESSO --- */
-        .progress-container { margin-top: 20px; text-align: left; }
+        .btn-cancel { background: #ef5350; color: white; }
+        .btn-back { background: #0277bd; color: white; }
+
+        /* BARRA DE PROGRESSO */
+        .progress-container { margin-top: 20px; text-align: left; display: none; } /* Oculto por padrão */
         .progress-bar-bg { width: 100%; height: 10px; background-color: #f1f1f1; border-radius: 10px; overflow: hidden; margin-top: 8px; }
-        .progress-bar-fill { height: 100%; width: 0%; background-color: #0277bd; border-radius: 10px; transition: width 0.4s ease; }
-        .loading-text { font-size: 0.85rem; color: #0277bd; font-weight: 500; min-height: 40px; display: block; }
-        .status-percent { float: right; color: #666; font-size: 0.8rem; }
+        .progress-bar-fill { height: 100%; width: 0%; background-color: #4CAF50; border-radius: 10px; transition: width 0.4s ease; }
+        .loading-text { font-size: 0.85rem; color: #4CAF50; font-weight: 500; min-height: 20px; display: block; margin-top: 5px;}
 
         video { width: 100%; border-radius: 12px; background: #000; }
         #reader { width: 100%; border-radius: 12px; overflow: hidden; background: #000; }
@@ -55,21 +57,25 @@
             <div class="card">
                 <h2>Boas Vindas a Hydro MPSA!</h2>
                 
-                <p>Nesse QR Code serão carregados vídeos educativos que serão utilizados em cada equipamento dentro da Usina.</p>
+                <p>Sistema de vídeos offline para suporte técnico na planta.</p>
                 
                 <div class="aviso-importante">
-                    ⚠️ <strong>Não feche a Aba que você acaba de abrir</strong>, pois será essencial para evitar os problemas de conexão que ocorrem dentro da planta.
+                    ⚠️ <strong>Primeiro Acesso:</strong> Clique no botão verde abaixo para salvar os vídeos no seu celular. Isso garante o funcionamento sem internet.
                 </div>
                 
-                <div class="progress-container">
-                    <span class="loading-text" id="load-msg">Um momento, estamos reunindo todos os arquivos essenciais para sua experiência! 👷‍♂️📦</span>
-                    <span class="status-percent" id="load-percent">0%</span>
+                <button class="btn btn-download" id="btn-baixar" onclick="baixarConteudo()">⬇️ BAIXAR VÍDEOS OFFLINE</button>
+
+                <div class="progress-container" id="area-progresso">
                     <div class="progress-bar-bg">
                         <div class="progress-bar-fill" id="progress-fill"></div>
                     </div>
+                    <span class="loading-text" id="status-txt">Iniciando download...</span>
                 </div>
 
+                <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
+
                 <button class="btn" id="btn-ler" onclick="iniciarScanner()">📷 LER QR CODE</button>
+                <div id="status-msg" style="font-size: 0.8rem; margin-top: 10px; color: #999;">Aguardando ação...</div>
             </div>
         </div>
 
@@ -92,50 +98,61 @@
     </div>
 
     <script>
-        // --- 1. LÓGICA DE CARREGAMENTO REALISTA ---
-        let progresso = 0;
-        const barra = document.getElementById('progress-fill');
-        const textoPorcentagem = document.getElementById('load-percent');
-        const textoMensagem = document.getElementById('load-msg');
-        const btnLer = document.getElementById('btn-ler');
+        // --- 1. LÓGICA DE DOWNLOAD FORÇADO (A SOLUÇÃO) ---
+        async function baixarConteudo() {
+            const btn = document.getElementById('btn-baixar');
+            const areaProg = document.getElementById('area-progresso');
+            const barra = document.getElementById('progress-fill');
+            const texto = document.getElementById('status-txt');
 
-        function atualizarBarra(valor, mensagemFinal = false) {
-            progresso = valor;
-            barra.style.width = progresso + "%";
-            textoPorcentagem.innerText = Math.floor(progresso) + "%";
+            btn.disabled = true;
+            btn.innerText = "Baixando...";
+            areaProg.style.display = "block";
 
-            if (progresso >= 100) {
-                textoMensagem.innerHTML = "Tudo pronto aqui, Vamos seguir adiante! 🚀✨";
-                textoMensagem.style.color = "#4CAF50"; // Verde Sucesso
-                btnLer.classList.add('ativo'); // Habilita o botão
-                if(!mensagemFinal) clearInterval(simuladorLoad);
+            // Lista manual dos arquivos pesados
+            const videos = [
+                './assets/moinho.mp4',
+                './assets/peneira.mp4'
+            ];
+
+            // Abre o cache manualmente
+            const cache = await caches.open('hydro-mpsa-vFinal');
+            
+            let total = videos.length;
+            let completados = 0;
+
+            for (const url of videos) {
+                texto.innerText = `Baixando: ${url.split('/').pop()}...`;
+                try {
+                    // Força o navegador a buscar na rede e ignorar cache parcial
+                    await cache.add(new Request(url, {cache: 'reload'}));
+                    completados++;
+                    let pct = (completados / total) * 100;
+                    barra.style.width = pct + "%";
+                } catch (err) {
+                    texto.innerText = "Erro ao baixar: " + url;
+                    texto.style.color = "red";
+                    console.error(err);
+                }
+            }
+
+            if (completados === total) {
+                texto.innerText = "Download Completo! Pode desligar a internet. ✅";
+                texto.style.color = "green";
+                btn.innerText = "Conteúdo Salvo ✓";
+                btn.style.background = "#ccc";
             }
         }
 
-        // Simulação realista: Carrega rápido até 80%, depois espera o Service Worker
-        const simuladorLoad = setInterval(() => {
-            if (progresso < 80) {
-                // Sobe aleatoriamente entre 1% e 5%
-                atualizarBarra(progresso + Math.random() * 5);
-            }
-        }, 300);
-
-        // --- 2. VERIFICAÇÃO DO SISTEMA (SW) ---
-        // Assim que o navegador confirmar que carregou tudo (window.onload), completamos 100%
+        // --- 2. SISTEMA PADRÃO ---
         window.onload = function() {
-            // Verifica se o leitor existe
             if (typeof Html5Qrcode === 'undefined') {
-                textoMensagem.innerHTML = "<span style='color:red'>ERRO: Falha ao carregar arquivos do sistema.</span>";
-                clearInterval(simuladorLoad);
+                document.getElementById('status-msg').innerHTML = "<span style='color:red'>ERRO: Leitor não carregou.</span>";
             } else {
-                // Finaliza a barra suavemente
-                setTimeout(() => {
-                    atualizarBarra(100, true);
-                }, 1000); // Pequeno delay pra dar sensação de conclusão
+                document.getElementById('status-msg').innerHTML = "Sistema pronto.";
             }
         };
 
-        // --- 3. FUNÇÕES DO SISTEMA (IGUAIS ANTES) ---
         function mostrarTela(id) {
             ['screen-home', 'screen-scanner', 'screen-video'].forEach(t => document.getElementById(t).classList.add('hidden'));
             document.getElementById(id).classList.remove('hidden');
