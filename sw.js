@@ -1,23 +1,22 @@
-const CACHE_NAME = 'hydro-mpsa-vFinal-Range';
+const CACHE_NAME = 'hydro-mpsa-vFix-Final';
 const FILES = [
   './',
   './index.html',
   './manifest.json',
   './assets/leitor.js',
-  './assets/moinho.mp4',
-  './assets/peneira.mp4'
+  'assets/moinho.mp4',
+  'assets/peneira.mp4'
 ];
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
   event.waitUntil(
     caches.open(CACHE_NAME).then(async (cache) => {
-      // Baixa um por um para garantir
       for (const file of FILES) {
         try {
           await cache.add(file);
         } catch (e) {
-          console.error('[SW] Erro no install:', file, e);
+          console.log('[SW] Install skip:', file);
         }
       }
     })
@@ -33,49 +32,46 @@ self.addEventListener('activate', (event) => {
   return self.clients.claim();
 });
 
-// A MÁGICA ACONTECE AQUI: Tratamento de Range Request (Vídeos)
 self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
 
-  // Se for arquivo de vídeo (.mp4), usamos a lógica especial
+  // Se for MP4, usa a lógica especial
   if (url.pathname.endsWith('.mp4')) {
     event.respondWith(tratarVideo(event.request));
   } else {
-    // Para o resto (HTML, JS, Imagens), usa o padrão
     event.respondWith(
       caches.match(event.request).then((resp) => resp || fetch(event.request))
     );
   }
 });
 
-// Função que fatia o vídeo do cache
 async function tratarVideo(request) {
   const cache = await caches.open(CACHE_NAME);
   const cachedResponse = await cache.match(request);
 
-  // Se não tem no cache, tenta baixar da rede
+  // Se não tem no cache, busca na rede
   if (!cachedResponse) {
     return fetch(request);
   }
 
-  // Se tem no cache, vamos fatiar!
-  const blob = await cachedResponse.blob();
   const range = request.headers.get('range');
 
-  // Se o navegador não pediu fatia (Range), entrega tudo
+  // --- A CORREÇÃO ESTÁ AQUI ---
+  // Se o navegador NÃO pediu fatia (Range), entrega o arquivo original INTACTO.
+  // Antes eu estava lendo o blob() aqui em cima, isso travava (Lock) o arquivo.
   if (!range) {
     return cachedResponse;
   }
+  // -----------------------------
 
-  // Calcula os bytes que o navegador pediu
+  // Agora sim, se tem Range, podemos abrir o arquivo e fatiar
+  const blob = await cachedResponse.blob();
   const parts = range.replace(/bytes=/, "").split("-");
   const start = parseInt(parts[0], 10);
   const end = parts[1] ? parseInt(parts[1], 10) : blob.size - 1;
   
-  // Corta o arquivo
   const chunk = blob.slice(start, end + 1);
 
-  // Cria a resposta 206 (Partial Content)
   const headers = new Headers({
     'Content-Type': 'video/mp4',
     'Content-Range': `bytes ${start}-${end}/${blob.size}`,
