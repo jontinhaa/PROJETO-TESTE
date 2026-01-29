@@ -3,325 +3,225 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hydro MPSA | Sistema Técnico</title>
+    <title>Hydro MPSA | Offline</title>
     <meta name="theme-color" content="#ffffff">
     <link rel="manifest" href="./manifest.json">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
-    
     <script src="./assets/leitor.js"></script>
 
     <style>
-        /* --- ESTILO CORPORATIVO INDUSTRIAL --- */
-        :root {
-            --hydro-blue: #004B87; /* Azul Oficial Hydro */
-            --hydro-light: #81D4FA;
-            --alert-red: #D32F2F;
-            --success-green: #388E3C;
-            --gray-bg: #F5F7FA;
-            --text-dark: #263238;
-        }
-
-        body { 
-            font-family: 'Roboto', sans-serif; 
-            background: var(--gray-bg); 
-            color: var(--text-dark); 
-            margin: 0; padding: 0;
-            display: flex; flex-direction: column; align-items: center; 
-            min-height: 100vh;
-        }
-        
-        .container { 
-            width: 100%; max-width: 480px; 
-            padding: 20px; box-sizing: border-box; 
-            text-align: center; 
-        }
-        
-        /* HEADER */
-        .header {
-            margin-bottom: 25px; border-bottom: 3px solid var(--hydro-light);
-            padding-bottom: 10px; display: inline-block;
-        }
-        .header h1 {
-            color: var(--hydro-blue); font-size: 1.5rem; margin: 0; 
-            text-transform: uppercase; letter-spacing: 1px;
-        }
-
-        /* CARDS */
-        .card { 
-            background: white; border-radius: 8px; padding: 20px; 
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 15px; 
-            border: 1px solid #E0E0E0;
-        }
-        
-        p { font-size: 0.9rem; line-height: 1.5; color: #546E7A; margin-bottom: 15px; }
-
-        /* --- MAPA INTERATIVO (ÁREA CLICÁVEL) --- */
-        .mapa-label { font-weight: bold; color: var(--hydro-blue); margin-bottom: 10px; display: block; text-align: left; }
-        
-        .mapa-container {
-            display: flex;
-            width: 100%;
-            height: 120px;
-            border: 2px solid var(--hydro-blue);
-            border-radius: 6px;
-            overflow: hidden;
-            margin-bottom: 20px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        }
-
-        .zona {
-            flex: 1; /* Divide exatamente no meio */
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 700;
-            font-size: 1rem;
-            color: white;
-            cursor: pointer;
-            transition: background 0.2s;
-            text-transform: uppercase;
-            position: relative;
-        }
-
-        .zona:active { opacity: 0.8; }
-
-        .zona-esquerda {
-            background-color: #0277bd; /* Azul Médio */
-            border-right: 1px solid white;
-        }
-        .zona-direita {
-            background-color: #004B87; /* Azul Escuro */
-            border-left: 1px solid white;
-        }
-
-        /* Ícones no mapa (Visual) */
-        .zona span { z-index: 2; }
-        .zona::after {
-            content: ''; position: absolute; top:0; left:0; right:0; bottom:0;
-            background: rgba(255,255,255,0.1); opacity: 0;
-        }
-        .zona:active::after { opacity: 1; }
-
-        /* BOTÕES */
-        .btn { 
-            background: var(--hydro-blue); color: white; padding: 14px; 
-            width: 100%; border: none; border-radius: 6px; 
-            font-weight: 600; font-size: 0.95rem; cursor: pointer; 
-            box-shadow: 0 2px 5px rgba(0,75,135,0.3);
-            display: flex; align-items: center; justify-content: center; gap: 10px;
-        }
-        
-        .btn-download { background: var(--success-green); margin-bottom: 15px; }
-        .btn-download:disabled { background: #B0BEC5; cursor: wait; }
-        
-        .btn-cancel { background: var(--alert-red); margin-top: 10px; }
-
-        /* STATUS E PROGRESSO */
-        .progress-box { display: none; margin-top: 15px; text-align: left; }
-        .progress-track { background: #E0E0E0; height: 8px; border-radius: 4px; overflow: hidden; }
-        .progress-fill { background: var(--success-green); height: 100%; width: 0%; transition: width 0.3s; }
-        .status-text { font-size: 0.8rem; color: var(--text-dark); margin-top: 5px; font-weight: 500; }
-
-        /* VÍDEO E LEITOR */
+        /* ESTILO MANTIDO */
+        body { font-family: 'Roboto', sans-serif; background: #F5F7FA; color: #263238; margin: 0; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
+        .container { width: 100%; max-width: 480px; padding: 20px; box-sizing: border-box; text-align: center; }
+        .card { background: white; border-radius: 8px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 15px; border: 1px solid #E0E0E0; }
+        .mapa-container { display: flex; width: 100%; height: 120px; border: 2px solid #004B87; border-radius: 6px; overflow: hidden; margin-bottom: 20px; }
+        .zona { flex: 1; display: flex; align-items: center; justify-content: center; font-weight: 700; color: white; cursor: pointer; }
+        .zona-esquerda { background-color: #0277bd; border-right: 1px solid white; }
+        .zona-direita { background-color: #004B87; border-left: 1px solid white; }
+        .btn { background: #004B87; color: white; padding: 14px; width: 100%; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; margin-top: 10px; }
+        .btn-download { background: #388E3C; margin-bottom: 10px; }
+        .btn-download:disabled { background: #B0BEC5; }
         video { width: 100%; border-radius: 4px; background: black; margin-top: 10px; }
-        #reader { width: 100%; border-radius: 4px; overflow: hidden; background: black; }
         .hidden { display: none !important; }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <div class="header"><h1>Hydro MPSA</h1></div>
+        <h3>Hydro MPSA - Modo IndexedDB</h3>
 
         <div id="screen-home">
             <div class="card">
-                <p><strong>Status:</strong> <span id="sys-status" style="color:orange">Verificando...</span></p>
-
-                <button class="btn btn-download" id="btn-baixar" onclick="baixarConteudo()">
-                    <span>⬇ BAIXAR CONTEÚDO OFFLINE</span>
+                <p>Armazenamento Seguro de Vídeo</p>
+                <button class="btn btn-download" id="btn-baixar" onclick="iniciarDownloadIndexedDB()">
+                    ⬇ BAIXAR VÍDEOS (BANCO DE DADOS)
                 </button>
-
-                <div class="progress-box" id="area-progresso">
-                    <div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
-                    <div class="status-text" id="status-txt">Iniciando...</div>
-                </div>
+                <div id="status-txt" style="margin-top:10px; font-size:0.8rem;">Aguardando...</div>
             </div>
 
             <div class="card">
-                <span class="mapa-label">MAPA DE EQUIPAMENTOS</span>
+                <span style="display:block; margin-bottom:10px; color:#004B87; font-weight:bold;">MAPA TÁTIL</span>
                 <div class="mapa-container">
-                    <div class="zona zona-esquerda" onclick="rotearVideo('moinho')">
-                        <span>⚙️ MOINHO</span>
-                    </div>
-                    <div class="zona zona-direita" onclick="rotearVideo('peneira')">
-                        <span>⛓️ PENEIRA</span>
-                    </div>
+                    <div class="zona zona-esquerda" onclick="tocarDoBanco('moinho')">MOINHO</div>
+                    <div class="zona zona-direita" onclick="tocarDoBanco('peneira')">PENEIRA</div>
                 </div>
-                <p style="font-size:0.75rem; color:#999; margin:0;">Toque na área para abrir o vídeo técnico.</p>
-            </div>
-
-            <div class="card">
-                <button class="btn" onclick="iniciarScanner()">📷 LER QR CODE</button>
-            </div>
-        </div>
-
-        <div id="screen-scanner" class="hidden">
-            <div class="card">
-                <h2>Leitura de Código</h2>
-                <div id="reader"></div>
-                <button class="btn btn-cancel" onclick="pararScanner()">CANCELAR</button>
+                <button class="btn" onclick="iniciarScanner()">📷 QR CODE</button>
             </div>
         </div>
 
         <div id="screen-video" class="hidden">
             <div class="card">
-                <h2 id="video-title">Equipamento</h2>
+                <h2 id="video-title">Player</h2>
                 <video id="player" controls controlsList="nodownload"></video>
-                <button class="btn" onclick="fecharVideo()" style="margin-top:15px; background: var(--hydro-blue);">
-                    ⬅ VOLTAR AO MAPA
-                </button>
+                <button class="btn" onclick="fecharVideo()">⬅ VOLTAR</button>
+            </div>
+        </div>
+        
+        <div id="screen-scanner" class="hidden">
+            <div class="card">
+                <div id="reader"></div>
+                <button class="btn" style="background:#D32F2F" onclick="pararScanner()">CANCELAR</button>
             </div>
         </div>
     </div>
 
     <script>
-        // --- 1. DOWNLOAD SYSTEM (ABSOLUTE PATHS) ---
-        async function baixarConteudo() {
+        // --- CONFIGURAÇÃO DO BANCO DE DADOS (IndexedDB) ---
+        const DB_NAME = 'HydroVideoDB';
+        const DB_VERSION = 1;
+        const STORE_NAME = 'videos';
+
+        // 1. Abre/Cria o Banco
+        function openDB() {
+            return new Promise((resolve, reject) => {
+                const request = indexedDB.open(DB_NAME, DB_VERSION);
+                request.onupgradeneeded = (e) => {
+                    const db = e.target.result;
+                    if (!db.objectStoreNames.contains(STORE_NAME)) {
+                        db.createObjectStore(STORE_NAME);
+                    }
+                };
+                request.onsuccess = (e) => resolve(e.target.result);
+                request.onerror = (e) => reject(e.target.error);
+            });
+        }
+
+        // 2. Salva Arquivo no Banco
+        async function salvarVideo(id, blob) {
+            const db = await openDB();
+            return new Promise((resolve, reject) => {
+                const tx = db.transaction(STORE_NAME, 'readwrite');
+                const store = tx.objectStore(STORE_NAME);
+                store.put(blob, id);
+                tx.oncomplete = () => resolve();
+                tx.onerror = () => reject(tx.error);
+            });
+        }
+
+        // 3. Recupera Arquivo do Banco
+        async function pegarVideo(id) {
+            const db = await openDB();
+            return new Promise((resolve, reject) => {
+                const tx = db.transaction(STORE_NAME, 'readonly');
+                const store = tx.objectStore(STORE_NAME);
+                const request = store.get(id);
+                request.onsuccess = () => resolve(request.result);
+                request.onerror = () => reject(request.error);
+            });
+        }
+
+        // --- FUNÇÃO DE DOWNLOAD (Salva no IndexedDB) ---
+        async function iniciarDownloadIndexedDB() {
             const btn = document.getElementById('btn-baixar');
-            const area = document.getElementById('area-progresso');
-            const bar = document.getElementById('progress-fill');
             const txt = document.getElementById('status-txt');
             
             btn.disabled = true;
-            area.style.display = 'block';
-
-            // Define URL base absoluta para evitar erros de ./ no Android
+            
+            // URLs absolutas para evitar erro
             const baseUrl = window.location.href.substring(0, window.location.href.lastIndexOf('/') + 1);
-            
-            // LISTA DE ARQUIVOS
-            const assets = [
-                baseUrl + 'assets/moinho.mp4',
-                baseUrl + 'assets/peneira.mp4'
+            const videos = [
+                { id: 'moinho', url: baseUrl + 'assets/moinho.mp4' },
+                { id: 'peneira', url: baseUrl + 'assets/peneira.mp4' }
             ];
-            
-            const cacheName = 'hydro-pro-v1'; // Deve bater com o sw.js
 
             try {
-                const cache = await caches.open(cacheName);
-                let done = 0;
-
-                for (const url of assets) {
-                    const name = url.split('/').pop();
-                    txt.innerText = `Baixando: ${name}...`;
-
-                    // Cache Buster: ?t=tempo para forçar download novo
-                    const safeUrl = url + "?t=" + Date.now();
+                for (const item of videos) {
+                    txt.innerText = `Baixando ${item.id}...`;
                     
-                    try {
-                        const response = await fetch(safeUrl, { cache: 'no-store' });
-                        if(!response.ok) throw new Error(`HTTP ${response.status}`);
-                        
-                        // Salva com a URL original (limpa)
-                        await cache.put(url, response.clone());
-                        // Salva versão relativa também por segurança
-                        await cache.put('assets/' + name, response.clone());
-                        
-                        done++;
-                        bar.style.width = (done/assets.length * 100) + "%";
-
-                    } catch (e) {
-                        alert(`FALHA CRÍTICA:\nNão foi possível baixar ${name}.\nVerifique a conexão.`);
-                        throw e;
-                    }
+                    // Fetch com Cache Buster
+                    const response = await fetch(item.url + "?t=" + Date.now());
+                    if (!response.ok) throw new Error(`Erro baixar ${item.id}`);
+                    
+                    const blob = await response.blob();
+                    
+                    // SALVA NO BANCO!
+                    await salvarVideo(item.id, blob);
                 }
 
-                txt.innerText = "Sincronização Concluída.";
-                txt.style.color = "var(--success-green)";
-                btn.innerText = "SISTEMA OFFLINE PRONTO ✓";
+                txt.innerText = "Vídeos Salvos no Banco de Dados! ✓";
+                txt.style.color = "green";
+                btn.innerText = "CONTEÚDO SEGURO ✓";
                 
             } catch (err) {
-                txt.innerText = "Erro no download.";
+                txt.innerText = "Erro: " + err.message;
                 txt.style.color = "red";
                 btn.disabled = false;
+                alert("Falha no download: " + err.message);
             }
         }
 
-        // --- 2. SISTEMA DE ROTAS E VÍDEO ---
-        function rotearVideo(tag) {
-            const id = tag.toLowerCase();
+        // --- PLAYER (Lê do IndexedDB e Toca) ---
+        async function tocarDoBanco(id) {
+            // Normaliza ID vindo do QR Code (ex: 'https://...#moinho' vira 'moinho')
+            if (id.includes('moinho')) id = 'moinho';
+            else if (id.includes('peneira')) id = 'peneira';
+            else { alert("ID desconhecido: " + id); return; }
+
             const player = document.getElementById('player');
             const title = document.getElementById('video-title');
             
-            let src = '';
-            let nome = '';
+            try {
+                // Tenta pegar do banco
+                const blob = await pegarVideo(id);
+                
+                if (!blob) {
+                    alert("Vídeo não encontrado no Banco de Dados! Faça o download primeiro.");
+                    return;
+                }
 
-            if(id.includes('moinho')) {
-                src = './assets/moinho.mp4';
-                nome = 'Moinho Primário';
-            } else if(id.includes('peneira')) {
-                src = './assets/peneira.mp4';
-                nome = 'Peneira Vibratória';
-            } else {
-                alert('Equipamento não identificado: ' + tag);
-                return;
+                // Cria URL mágica (blob:...)
+                const videoURL = URL.createObjectURL(blob);
+                
+                title.innerText = id.toUpperCase();
+                player.src = videoURL;
+                
+                document.getElementById('screen-home').classList.add('hidden');
+                document.getElementById('screen-scanner').classList.add('hidden');
+                document.getElementById('screen-video').classList.remove('hidden');
+                
+                player.play();
+
+            } catch (err) {
+                alert("Erro ao abrir vídeo: " + err.message);
             }
-
-            // Ativa Player
-            title.innerText = nome;
-            player.src = src;
-            mostrarTela('screen-video');
-            player.play().catch(e => console.log("Autoplay bloqueado pelo browser"));
         }
 
         function fecharVideo() {
             const player = document.getElementById('player');
             player.pause();
-            player.src = ""; // Libera memória
-            mostrarTela('screen-home');
+            // Limpa a URL da memória para não travar o celular
+            if(player.src) URL.revokeObjectURL(player.src);
+            player.src = "";
+            
+            document.getElementById('screen-video').classList.add('hidden');
+            document.getElementById('screen-home').classList.remove('hidden');
         }
 
-        // --- 3. UTILITÁRIOS E LEITOR ---
-        function mostrarTela(id) {
-            ['screen-home', 'screen-scanner', 'screen-video'].forEach(i => 
-                document.getElementById(i).classList.add('hidden'));
-            document.getElementById(id).classList.remove('hidden');
-        }
-
+        // --- SCANNER E OUTROS ---
+        // (Mantido simples para focar no vídeo)
         let scanner;
         function iniciarScanner() {
-            mostrarTela('screen-scanner');
+            document.getElementById('screen-home').classList.add('hidden');
+            document.getElementById('screen-scanner').classList.remove('hidden');
             scanner = new Html5Qrcode("reader");
             scanner.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 },
                 (decoded) => {
                     scanner.stop().then(() => {
                         scanner.clear();
-                        rotearVideo(decoded);
+                        tocarDoBanco(decoded); // Usa a mesma função do banco
                     });
                 },
                 (err) => {}
             );
         }
-
         function pararScanner() {
             if(scanner) scanner.stop().then(() => scanner.clear()).catch(()=>{});
-            mostrarTela('screen-home');
+            document.getElementById('screen-scanner').classList.add('hidden');
+            document.getElementById('screen-home').classList.remove('hidden');
         }
-
-        // --- 4. INICIALIZAÇÃO ---
-        window.onload = () => {
-            const status = document.getElementById('sys-status');
-            if(typeof Html5Qrcode === 'undefined') {
-                status.innerText = "Erro: Leitor Ausente";
-                status.style.color = "red";
-            } else {
-                status.innerText = "Online e Operacional";
-                status.style.color = "green";
-            }
-        };
-
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('./sw.js');
-        }
+        
+        // Service Worker (Apenas para cachear o HTML/JS básico, não os vídeos)
+        if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js');
     </script>
 </body>
 </html>
