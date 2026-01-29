@@ -106,41 +106,52 @@
             const texto = document.getElementById('status-txt');
 
             btn.disabled = true;
-            btn.innerText = "Baixando...";
+            btn.innerText = "Preparando...";
             areaProg.style.display = "block";
 
-            // Lista manual dos arquivos pesados
+            // Lista manual
             const videos = [
                 './assets/moinho.mp4',
                 './assets/peneira.mp4'
             ];
 
-            // Abre o cache manualmente
-            const cache = await caches.open('hydro-mpsa-vFinal');
+            // Atenção: Use o MESMO nome do cache do sw.js
+            const cacheName = 'hydro-mpsa-vFinal-Range'; 
+            const cache = await caches.open(cacheName);
             
             let total = videos.length;
             let completados = 0;
 
             for (const url of videos) {
-                texto.innerText = `Baixando: ${url.split('/').pop()}...`;
+                texto.innerText = `Baixando arquivo ${completados + 1}/${total}...`;
                 try {
-                    // Força o navegador a buscar na rede e ignorar cache parcial
-                    await cache.add(new Request(url, {cache: 'reload'}));
+                    // 1. Baixa o arquivo inteiro como BLOB
+                    const response = await fetch(url);
+                    if (!response.ok) throw new Error('Rede falhou');
+                    
+                    // 2. Salva no Cache manualmente
+                    await cache.put(url, response);
+                    
                     completados++;
                     let pct = (completados / total) * 100;
                     barra.style.width = pct + "%";
                 } catch (err) {
-                    texto.innerText = "Erro ao baixar: " + url;
+                    texto.innerText = "Erro no arquivo: " + url;
                     texto.style.color = "red";
                     console.error(err);
                 }
             }
 
             if (completados === total) {
-                texto.innerText = "Download Completo! Pode desligar a internet. ✅";
+                texto.innerText = "Sistema 100% Offline e Pronto! 🚀";
                 texto.style.color = "green";
-                btn.innerText = "Conteúdo Salvo ✓";
+                btn.innerText = "Vídeos Salvos ✓";
                 btn.style.background = "#ccc";
+                
+                // Força o Service Worker a reconhecer os novos arquivos
+                if (navigator.serviceWorker.controller) {
+                    navigator.serviceWorker.controller.postMessage({action: 'skipWaiting'});
+                }
             }
         }
 
@@ -208,3 +219,4 @@
     </script>
 </body>
 </html>
+
