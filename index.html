@@ -109,13 +109,17 @@
             btn.innerText = "Conectando...";
             areaProg.style.display = "block";
 
-            // LISTA SEM O PONTO (./) PARA EVITAR BUG NO ANDROID
+            // PEGA O ENDEREÇO BASE DO SITE (Ex: https://jonathan.github.io/nexos/)
+            // Remove o "index.html" se estiver lá
+            const baseUrl = window.location.href.substring(0, window.location.href.lastIndexOf('/') + 1);
+
+            // MONTA OS LINKS ABSOLUTOS (SEM ERRO DE CAMINHO)
             const videos = [
-                'assets/moinho.mp4',
-                'assets/peneira.mp4'
+                baseUrl + 'assets/moinho.mp4',
+                baseUrl + 'assets/peneira.mp4'
             ];
 
-            // Use o MESMO nome que está no sw.js
+            // NOME DO CACHE (Tem que bater com o sw.js)
             const cacheName = 'hydro-mpsa-vFinal-Range'; 
             
             try {
@@ -124,28 +128,35 @@
                 let completados = 0;
 
                 for (const url of videos) {
-                    texto.innerText = `Baixando ${url.split('/').pop()}...`;
+                    const nomeArquivo = url.split('/').pop();
+                    texto.innerText = `Baixando ${nomeArquivo}...`;
                     
-                    // O TRUQUE: Adiciona um número aleatório para furar o cache antigo
-                    const urlParaBaixar = url + "?v=" + new Date().getTime();
+                    // Adiciona ?v=tempo para ignorar cache antigo
+                    const urlBypass = url + "?v=" + new Date().getTime();
                     
-                    // Tenta baixar direto da internet
-                    const response = await fetch(urlParaBaixar, { cache: 'no-store' });
-                    
-                    if (!response.ok) {
-                        throw new Error(`Erro ${response.status} ao baixar ${url}`);
-                    }
-                    
-                    // Salva no cache com o nome CORRETO (sem o ?v=...)
-                    // Precisamos clonar porque o corpo da resposta só pode ser lido uma vez
-                    await cache.put(url, response.clone());
-                    
-                    // Se for o primeiro vídeo, adicionamos o ./ também por segurança
-                    await cache.put('./' + url, response.clone());
+                    try {
+                        const response = await fetch(urlBypass, { cache: 'no-store' });
+                        
+                        if (!response.ok) {
+                            // SE DER ERRO, VAI MOSTRAR NA TELA O MOTIVO EXATO
+                            throw new Error(`Erro ${response.status} (${response.statusText})`);
+                        }
+                        
+                        // Salva no cache com a URL original (limpa)
+                        await cache.put(url, response.clone());
+                        
+                        // Salva também a versão relativa por garantia
+                        await cache.put('./assets/' + nomeArquivo, response.clone());
 
-                    completados++;
-                    let pct = (completados / total) * 100;
-                    barra.style.width = pct + "%";
+                        completados++;
+                        let pct = (completados / total) * 100;
+                        barra.style.width = pct + "%";
+                        
+                    } catch (fetchErr) {
+                        // ALERTA DE ERRO ESPECÍFICO PARA VOCÊ VER
+                        alert(`FALHA AO BAIXAR!\n\nArquivo: ${nomeArquivo}\nErro: ${fetchErr.message}\n\nLink tentado: ${url}`);
+                        throw fetchErr; // Para o loop
+                    }
                 }
 
                 if (completados === total) {
@@ -153,16 +164,14 @@
                     texto.style.color = "green";
                     btn.innerText = "Conteúdo Salvo ✓";
                     btn.style.background = "#ccc";
-                    alert("Sucesso! Tudo baixado. Pode desligar a internet e testar.");
+                    alert("Sucesso! Pode desligar a internet.");
                 }
 
             } catch (err) {
-                // MENSAGEM DE ERRO DETALHADA
-                texto.innerHTML = "Falha: " + err.message;
+                texto.innerHTML = "Falha no download.";
                 texto.style.color = "red";
                 btn.disabled = false;
                 btn.innerText = "Tentar Novamente";
-                alert("Ocorreu um erro:\n" + err.message + "\n\nVerifique se o arquivo existe na pasta 'assets' do GitHub e se o nome é EXATAMENTE minúsculo.");
                 console.error(err);
             }
         }
@@ -231,5 +240,6 @@
     </script>
 </body>
 </html>
+
 
 
