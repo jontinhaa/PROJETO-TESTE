@@ -83,68 +83,103 @@
             <div class="card">
                 <h2 id="video-title">Equipamento</h2>
                 <video id="player" controls controlsList="nodownload"></video>
-                <button class="btn btn-back" onclick="pararScanner()">⬅ Voltar ao Início</button>
+                <button class="btn btn-back" onclick="fecharVideo()">⬅ Voltar ao Início</button>
             </div>
         </div>
     </div>
 
     <script>
-        // Verificação do JS do Leitor
+        // --- 1. VERIFICAÇÃO INICIAL ---
         window.onload = function() {
             if (typeof Html5Qrcode === 'undefined') {
-                document.getElementById('status-msg').innerHTML = "<span style='color:red'>ERRO: Arquivo leitor.js não encontrado.</span>";
+                document.getElementById('status-msg').innerHTML = "<span style='color:red'>ERRO: leitor.js não encontrado.</span>";
             } else {
                 document.getElementById('status-msg').innerHTML = "<span style='color:#4CAF50'>✓ Sistema Online e Pronto</span>";
             }
         };
 
+        // --- 2. NAVEGAÇÃO ENTRE TELAS ---
         function mostrarTela(id) {
+            // Esconde todas
             ['screen-home', 'screen-scanner', 'screen-video'].forEach(t => document.getElementById(t).classList.add('hidden'));
+            // Mostra a desejada
             document.getElementById(id).classList.remove('hidden');
         }
 
+        // --- 3. LÓGICA DO SCANNER ---
         let html5QrCode;
+
         function iniciarScanner() {
             mostrarTela('screen-scanner');
             html5QrCode = new Html5Qrcode("reader");
-            html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 },
+            
+            // Configurações da Câmera
+            const config = { fps: 10, qrbox: 250 };
+            
+            html5QrCode.start({ facingMode: "environment" }, config, 
                 (decodedText) => {
-                    html5QrCode.stop().then(() => { html5QrCode.clear(); rotearVideo(decodedText); });
+                    // SUCESSO NA LEITURA
+                    // 1. Para a câmera
+                    html5QrCode.stop().then(() => {
+                        html5QrCode.clear();
+                        // 2. Abre o vídeo
+                        rotearVideo(decodedText);
+                    });
                 },
-                (errorMessage) => { }
+                (errorMessage) => { 
+                    // Lendo... (aguardando foco)
+                }
             ).catch(err => {
                 document.getElementById('scan-error').innerText = "Erro Câmera: " + err;
             });
         }
 
+        // Função para CANCELAR a leitura (Botão Vermelho)
         function pararScanner() {
-            if(html5QrCode) html5QrCode.stop().then(() => html5QrCode.clear()).catch(() => {});
+            if(html5QrCode) {
+                html5QrCode.stop().then(() => html5QrCode.clear()).catch(err => console.log("Câmera já parada"));
+            }
             mostrarTela('screen-home');
-            const p = document.getElementById('player');
-            p.pause(); p.src = "";
+        }
+
+        // --- 4. LÓGICA DO VÍDEO (CORRIGIDA) ---
+        
+        // Função para VOLTAR do vídeo (Botão Azul Escuro)
+        function fecharVideo() {
+            const player = document.getElementById('player');
+            player.pause();         // Para o vídeo
+            player.currentTime = 0; // Volta pro começo
+            player.src = "";        // Limpa da memória (importante!)
+            mostrarTela('screen-home');
         }
 
         function rotearVideo(texto) {
-            const p = document.getElementById('player');
-            const t = document.getElementById('video-title');
+            const player = document.getElementById('player');
+            const titulo = document.getElementById('video-title');
             
-            if (texto.toLowerCase().includes('moinho')) {
-                t.innerText = "Moinho Primário 01";
-                p.src = "./assets/moinho.mp4";
+            // Detecta a palavra chave (independente de maiúscula/minúscula)
+            const codigo = texto.toLowerCase();
+
+            if (codigo.includes('moinho')) {
+                titulo.innerText = "Moinho Primário 01";
+                player.src = "./assets/moinho.mp4";
                 mostrarTela('screen-video');
-                p.play();
-            } else if (texto.toLowerCase().includes('peneira')) {
-                t.innerText = "Peneira Vibratória";
-                p.src = "./assets/peneira.mp4";
+                player.play(); // Toca automático
+            } else if (codigo.includes('peneira')) {
+                titulo.innerText = "Peneira Vibratória";
+                player.src = "./assets/peneira.mp4";
                 mostrarTela('screen-video');
-                p.play();
+                player.play(); // Toca automático
             } else {
                 alert("QR Code não reconhecido.\nLeitura: " + texto);
                 mostrarTela('screen-home');
             }
         }
 
-        if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js');
+        // --- 5. OFFLINE ---
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('./sw.js');
+        }
     </script>
 </body>
 </html>
