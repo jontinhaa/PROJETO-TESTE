@@ -1,4 +1,4 @@
-const CACHE_NAME = 'hydro-debug-v1';
+const CACHE_NAME = 'hydro-mpsa-vFinal';
 const FILES = [
   './',
   './index.html',
@@ -12,15 +12,12 @@ self.addEventListener('install', (event) => {
   self.skipWaiting();
   event.waitUntil(
     caches.open(CACHE_NAME).then(async (cache) => {
-      console.log('[SW] Iniciando cache arquivo por arquivo...');
-      
+      // Estratégia "Um por Um" (Mais robusta)
       for (const file of FILES) {
         try {
           await cache.add(file);
-          console.log(`%c [OK] Cacheado: ${file}`, 'color: green');
         } catch (error) {
-          console.error(`%c [ERRO CRÍTICO] Falha ao baixar: ${file}`, 'color: red; font-weight: bold; font-size: 14px', error);
-          // O erro aparecerá aqui especificamente
+          console.error('[SW] Falha ao cachear:', file, error);
         }
       }
     })
@@ -38,6 +35,13 @@ self.addEventListener('activate', (event) => {
 
 self.addEventListener('fetch', (event) => {
   event.respondWith(
-    caches.match(event.request).then((resp) => resp || fetch(event.request))
+    caches.match(event.request).then((cachedResponse) => {
+      // Se achou no cache, retorna
+      if (cachedResponse) {
+        return cachedResponse;
+      }
+      // Se não achou, busca na rede
+      return fetch(event.request);
+    })
   );
 });
