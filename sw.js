@@ -1,10 +1,10 @@
-const CACHE_NAME = 'hydro-mpsa-v11'; // Mudei versão para limpar o erro
+const CACHE_NAME = 'hydro-mpsa-v12'; // Mudei para v12 (FORÇA ATUALIZAÇÃO)
 const FILES = [
   './index.html',
   './manifest.json',
-  './assets/leitor.js',   // <--- GARANTA QUE O NOME NA PASTA É EXATAMENTE ESTE
-  './assets/moinho.mp4',
-  './assets/peneira.mp4'
+  './assets/leitor.js',
+  './assets/moinho.mp4',   // Garanta que está tudo minúsculo aqui
+  './assets/peneira.mp4'   // Garanta que está tudo minúsculo aqui
 ];
 
 self.addEventListener('install', (event) => {
@@ -12,12 +12,12 @@ self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then((cache) => {
-        console.log('[SW] Cacheando arquivos...');
+        console.log('[SW] Baixando arquivos v12...');
         return cache.addAll(FILES);
       })
       .catch((err) => {
-        console.error('[SW] ERRO CRÍTICO NO CACHE:', err);
-        // O erro no console vai te dizer qual arquivo falhou se você olhar os detalhes
+        // Se der erro aqui, é porque um dos arquivos da lista acima NÃO EXISTE ou está com nome errado
+        console.error('[SW] ERRO CRÍTICO: Não foi possível baixar algum arquivo.', err);
       })
   );
 });
