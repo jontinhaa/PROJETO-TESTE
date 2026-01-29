@@ -1,5 +1,5 @@
-const CACHE_NAME = 'hydro-mpsa-vFix-Final';
-const FILES = [
+const CACHE_NAME = 'hydro-pro-v1'; // Sincronizado com o index.html
+const CORE_FILES = [
   './',
   './index.html',
   './manifest.json',
@@ -8,21 +8,19 @@ const FILES = [
   'assets/peneira.mp4'
 ];
 
+// 1. INSTALAÇÃO (Cache Inicial)
 self.addEventListener('install', (event) => {
   self.skipWaiting();
   event.waitUntil(
-    caches.open(CACHE_NAME).then(async (cache) => {
-      for (const file of FILES) {
-        try {
-          await cache.add(file);
-        } catch (e) {
-          console.log('[SW] Install skip:', file);
-        }
-      }
+    caches.open(CACHE_NAME).then((cache) => {
+      // Tenta baixar arquivos core. Se falhar, não trava a instalação.
+      // O download real e pesado é feito pelo botão no index.html
+      CORE_FILES.forEach(file => cache.add(file).catch(err => console.log('SW Skip:', file)));
     })
   );
 });
 
+// 2. ATIVAÇÃO (Limpeza)
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((keys) => Promise.all(
@@ -32,46 +30,45 @@ self.addEventListener('activate', (event) => {
   return self.clients.claim();
 });
 
+// 3. INTERCEPTAÇÃO (A Mágica do Vídeo)
 self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
 
-  // Se for MP4, usa a lógica especial
+  // Lógica Específica para Vídeos MP4 (Range Requests)
   if (url.pathname.endsWith('.mp4')) {
-    event.respondWith(tratarVideo(event.request));
+    event.respondWith(servirVideoFatiado(event.request));
   } else {
+    // Padrão para HTML/JS/CSS
     event.respondWith(
-      caches.match(event.request).then((resp) => resp || fetch(event.request))
+      caches.match(event.request).then(resp => resp || fetch(event.request))
     );
   }
 });
 
-async function tratarVideo(request) {
+// FUNÇÃO TÉCNICA: Serve vídeo fatiado do cache para satisfazer o player do Android
+async function servirVideoFatiado(request) {
   const cache = await caches.open(CACHE_NAME);
-  const cachedResponse = await cache.match(request);
+  const response = await cache.match(request);
 
-  // Se não tem no cache, busca na rede
-  if (!cachedResponse) {
-    return fetch(request);
-  }
+  // Se não tem no cache, tenta rede
+  if (!response) return fetch(request);
 
   const range = request.headers.get('range');
+  
+  // SE NÃO TEM RANGE (Browser pediu tudo): Entrega direto.
+  // IMPORTANTE: Não ler o blob() aqui para não travar o corpo da resposta.
+  if (!range) return response;
 
-  // --- A CORREÇÃO ESTÁ AQUI ---
-  // Se o navegador NÃO pediu fatia (Range), entrega o arquivo original INTACTO.
-  // Antes eu estava lendo o blob() aqui em cima, isso travava (Lock) o arquivo.
-  if (!range) {
-    return cachedResponse;
-  }
-  // -----------------------------
-
-  // Agora sim, se tem Range, podemos abrir o arquivo e fatiar
-  const blob = await cachedResponse.blob();
+  // SE TEM RANGE (Browser pediu fatia):
+  const blob = await response.blob();
   const parts = range.replace(/bytes=/, "").split("-");
   const start = parseInt(parts[0], 10);
   const end = parts[1] ? parseInt(parts[1], 10) : blob.size - 1;
   
+  // Fatiamento binário
   const chunk = blob.slice(start, end + 1);
 
+  // Cabeçalhos HTTP 206 (Conteúdo Parcial)
   const headers = new Headers({
     'Content-Type': 'video/mp4',
     'Content-Range': `bytes ${start}-${end}/${blob.size}`,
